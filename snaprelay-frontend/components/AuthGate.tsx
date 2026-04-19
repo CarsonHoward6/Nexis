@@ -22,11 +22,7 @@ export function AuthGate({
   }, [user, loading, router, redirectTo]);
 
   if (loading || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-text-muted">
-        Loading…
-      </div>
-    );
+    return <div className="min-h-screen bg-bg" />;
   }
   return <>{children}</>;
 }
