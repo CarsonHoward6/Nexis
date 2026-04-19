@@ -44,7 +44,7 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 5,
+          gap: 0,
           background: "#0d0f14",
           opacity: phase === "fade" ? 0 : 1,
           transition: "opacity 1s ease",
@@ -65,6 +65,7 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
             fontWeight: 700,
             color: "#ffffff",
             letterSpacing: "-0.02em",
+            marginTop: -30,
             animation: "nx-in 0.8s ease-out 0.3s forwards",
             opacity: 0,
           }}

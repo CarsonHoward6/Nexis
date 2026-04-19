@@ -3,9 +3,9 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "./Button";
 import { Input } from "./Input";
-import { Logo } from "./Logo";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "./Toast";
 
@@ -78,8 +78,26 @@ export function LoginView() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
-        <div className="mb-10 flex items-center justify-center">
-          <Logo size={72} />
+        <div className="mb-8 flex flex-col items-center gap-0">
+          <Image
+            src="/logo.png"
+            alt="Nexis"
+            width={120}
+            height={120}
+            priority
+            className="object-contain"
+          />
+          <span
+            className="text-2xl font-bold tracking-tight"
+            style={{
+              marginTop: -16,
+              background: "var(--gradient-brand)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Nexis
+          </span>
         </div>
         <div className="rounded-[16px] border border-border bg-surface p-8 shadow-[var(--shadow-soft)]">
           <h2 className="mb-1 text-2xl font-semibold">Sign in</h2>
