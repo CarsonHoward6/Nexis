@@ -1,6 +1,0 @@
-{
-  "buildCommand": "cd snaprelay-frontend && npm install && npm run build",
-  "outputDirectory": "snaprelay-frontend/.next",
-  "framework": "nextjs",
-  "installCommand": "cd snaprelay-frontend && npm install"
-}
