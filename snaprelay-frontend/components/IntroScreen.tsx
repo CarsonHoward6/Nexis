@@ -13,11 +13,11 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (phase !== "intro") return;
-    const t1 = setTimeout(() => setPhase("fadeout"), 2200);
+    const t1 = setTimeout(() => setPhase("fadeout"), 2400);
     const t2 = setTimeout(() => {
       setPhase("done");
       sessionStorage.setItem("nexis:intro-seen", "1");
-    }, 2700);
+    }, 2900);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -28,26 +28,71 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <style>{`
+        @keyframes nx-logo {
+          0%   { opacity: 0; transform: scale(0.6); filter: blur(12px); }
+          40%  { opacity: 1; transform: scale(1.02); filter: blur(0); }
+          70%  { opacity: 1; transform: scale(1); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes nx-text {
+          0%   { opacity: 0; transform: translateY(16px); }
+          40%  { opacity: 0; transform: translateY(16px); }
+          70%  { opacity: 1; transform: translateY(0); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes nx-glow {
+          0%   { opacity: 0; }
+          50%  { opacity: 0.6; }
+          100% { opacity: 0.3; }
+        }
+        @keyframes nx-out {
+          0%   { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
       <div
-        className={[
-          "fixed inset-0 z-[100] flex flex-col items-center justify-center",
-          "bg-gradient-to-b from-[#0d0f14] to-[#121826]",
-          phase === "fadeout" ? "animate-[intro-fade-out_500ms_ease-in-out_forwards]" : "",
-        ].join(" ")}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 100,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(180deg, #0d0f14 0%, #121826 100%)",
+          animation: phase === "fadeout" ? "nx-out 500ms ease-in-out forwards" : "none",
+        }}
       >
-        <div className="flex flex-col items-center gap-6">
+        <div
+          style={{
+            position: "absolute",
+            width: 300,
+            height: 300,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(58,141,255,0.15) 0%, transparent 70%)",
+            animation: "nx-glow 2400ms ease-in-out forwards",
+          }}
+        />
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, position: "relative" }}>
           <Image
             src="/logo.png"
             alt="Nexis"
-            width={120}
-            height={120}
+            width={140}
+            height={140}
             priority
-            className="animate-[intro-logo_2200ms_ease-in-out_forwards] drop-shadow-[0_0_40px_rgba(58,141,255,0.3)]"
+            style={{
+              animation: "nx-logo 2000ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
+              filter: "drop-shadow(0 0 40px rgba(58,141,255,0.4))",
+            }}
           />
           <h1
-            className="animate-[intro-text_2200ms_ease-in-out_forwards] text-3xl font-bold tracking-tight"
             style={{
-              background: "var(--gradient-brand)",
+              animation: "nx-text 2000ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
+              fontSize: 36,
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+              background: "linear-gradient(135deg, #3a8dff, #4f5dff, #8a5cff, #c86bff)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -56,7 +101,7 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
           </h1>
         </div>
       </div>
-      <div className="invisible">{children}</div>
+      <div style={{ visibility: "hidden" }}>{children}</div>
     </>
   );
 }
