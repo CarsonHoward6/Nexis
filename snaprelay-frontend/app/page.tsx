@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AuthGate } from "@/components/AuthGate";
+import { LoginView } from "@/components/LoginView";
 import { GroupSidebar, type GroupSelection } from "@/components/GroupSidebar";
 import { UploadZone } from "@/components/UploadZone";
 import { FileGrid } from "@/components/FileGrid";
@@ -16,12 +16,12 @@ import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import type { FileItem, Group } from "@/lib/types";
 
-export default function GalleryPage() {
-  return (
-    <AuthGate>
-      <Gallery />
-    </AuthGate>
-  );
+export default function HomePage() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div className="min-h-screen bg-bg" />;
+  if (!user) return <LoginView />;
+  return <Gallery />;
 }
 
 function Gallery() {
