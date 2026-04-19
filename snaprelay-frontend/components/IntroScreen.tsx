@@ -44,7 +44,7 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 10,
+          gap: 5,
           background: "#0d0f14",
           opacity: phase === "fade" ? 0 : 1,
           transition: "opacity 1s ease",
@@ -54,14 +54,14 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
         <Image
           src="/logo.png"
           alt="Nexis"
-          width={140}
-          height={140}
+          width={180}
+          height={180}
           priority
           style={{ animation: "nx-in 0.8s ease-out forwards" }}
         />
         <span
           style={{
-            fontSize: 42,
+            fontSize: 52,
             fontWeight: 700,
             color: "#ffffff",
             letterSpacing: "-0.02em",

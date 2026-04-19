@@ -79,7 +79,7 @@ export function LoginView() {
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="mb-10 flex items-center justify-center">
-          <Logo size={32} />
+          <Logo size={72} />
         </div>
         <div className="rounded-[16px] border border-border bg-surface p-8 shadow-[var(--shadow-soft)]">
           <h2 className="mb-1 text-2xl font-semibold">Sign in</h2>
