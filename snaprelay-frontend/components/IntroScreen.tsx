@@ -34,6 +34,7 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
           to   { opacity: 1; transform: scale(1); }
         }
       `}</style>
+      {/* Intro overlay — fades out */}
       <div
         style={{
           position: "fixed",
@@ -43,17 +44,18 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 28,
+          gap: 10,
           background: "#0d0f14",
           opacity: phase === "fade" ? 0 : 1,
           transition: "opacity 1s ease",
+          pointerEvents: phase === "fade" ? "none" : "auto",
         }}
       >
         <Image
           src="/logo.png"
           alt="Nexis"
-          width={160}
-          height={160}
+          width={140}
+          height={140}
           priority
           style={{ animation: "nx-in 0.8s ease-out forwards" }}
         />
@@ -70,7 +72,15 @@ export function IntroScreen({ children }: { children: React.ReactNode }) {
           Nexis
         </span>
       </div>
-      <div style={{ visibility: "hidden" }}>{children}</div>
+      {/* Children underneath — fade in as overlay fades out */}
+      <div
+        style={{
+          opacity: phase === "fade" ? 1 : 0,
+          transition: "opacity 1s ease",
+        }}
+      >
+        {children}
+      </div>
     </>
   );
 }
