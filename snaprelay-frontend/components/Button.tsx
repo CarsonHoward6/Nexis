@@ -14,9 +14,9 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-accent text-text-inverse hover:brightness-110 active:brightness-95 disabled:bg-disabled disabled:text-text-muted",
+    "text-white hover:shadow-[var(--shadow-glow)] hover:brightness-110 active:brightness-95 disabled:opacity-40 disabled:hover:shadow-none",
   secondary:
-    "bg-surface-elevated text-text-primary hover:bg-[color-mix(in_oklab,var(--surface-elevated)_85%,white)] active:brightness-95 disabled:text-text-muted",
+    "bg-surface-elevated text-text-primary border border-border hover:border-accent/30 hover:shadow-[var(--shadow-glow)] active:brightness-95 disabled:text-text-muted",
   ghost:
     "bg-transparent text-text-primary hover:bg-surface active:brightness-95 disabled:text-text-muted",
   danger:
@@ -37,9 +37,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <button
       ref={ref}
       disabled={disabled || loading}
+      style={variant === "primary" ? { background: "var(--gradient-brand)" } : undefined}
       className={[
         "inline-flex items-center justify-center gap-2 rounded-[12px] font-medium",
-        "transition-[transform,filter,background-color,box-shadow] duration-150 ease-in-out",
+        "transition-[transform,filter,background-color,box-shadow] duration-200 ease-in-out",
         "active:scale-[0.98] disabled:cursor-not-allowed disabled:active:scale-100",
         variantClasses[variant],
         sizeClasses[size],

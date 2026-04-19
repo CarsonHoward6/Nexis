@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0f172a;
-  --surface: #1e293b;
-  --surface-elevated: #273449;
-  --text-primary: #e5e7eb;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-inverse: #0f172a;
-  --accent: #38bdf8;
-  --accent-hover: #56c7fa;
-  --accent-active: #2fa8dd;
-  --accent-secondary: #22c55e;
-  --border: #334155;
-  --divider: #1e293b;
-  --disabled: #334155;
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.25);
-  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --bg: #0d0f14;
+  --bg-end: #1a2235;
+  --surface: #121826;
+  --surface-elevated: #1a2235;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a7b8;
+  --text-muted: #6b7280;
+  --text-inverse: #0d0f14;
+  --accent: #3a8dff;
+  --accent-hover: #4fd1ff;
+  --accent-active: #4f5dff;
+  --accent-secondary: #8a5cff;
+  --accent-magenta: #c86bff;
+  --glow-cyan: #4fd1ff;
+  --glow-purple: #9b6bff;
+  --border: rgba(255, 255, 255, 0.08);
+  --divider: rgba(255, 255, 255, 0.05);
+  --disabled: #1a2235;
+  --gradient-brand: linear-gradient(135deg, #3a8dff, #4f5dff, #8a5cff, #c86bff);
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(58, 141, 255, 0.15);
 }
 
 @theme inline {
   --color-bg: var(--bg);
+  --color-bg-end: var(--bg-end);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
   --color-text-primary: var(--text-primary);
@@ -31,12 +38,16 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-active: var(--accent-active);
   --color-accent-secondary: var(--accent-secondary);
+  --color-accent-magenta: var(--accent-magenta);
+  --color-glow-cyan: var(--glow-cyan);
+  --color-glow-purple: var(--glow-purple);
   --color-border: var(--border);
   --color-divider: var(--divider);
   --color-disabled: var(--disabled);
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   --shadow-soft: var(--shadow-soft);
   --shadow-hover: var(--shadow-hover);
+  --shadow-glow: var(--shadow-glow);
   --radius-btn: 12px;
   --radius-card: 16px;
 }
@@ -92,10 +103,62 @@ h3 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--surface-elevated);
   border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--surface-elevated);
+  background: var(--text-muted);
+}
+
+@keyframes intro-logo {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+    filter: blur(8px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+  85% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes intro-text {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  30% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes intro-fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    pointer-events: none;
+  }
 }

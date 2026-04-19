@@ -36,7 +36,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               "pointer-events-auto min-w-[240px] max-w-[80vw] rounded-[12px] px-4 py-3 text-sm shadow-[var(--shadow-soft)]",
               "animate-[fade_200ms_ease-in-out]",
               t.kind === "success"
-                ? "bg-accent-secondary text-text-inverse"
+                ? "bg-accent text-white"
                 : t.kind === "error"
                   ? "bg-red-500 text-white"
                   : "bg-surface-elevated text-text-primary border border-border",
