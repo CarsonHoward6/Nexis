@@ -9,8 +9,8 @@ import type {
   User,
 } from "./types";
 
-const SESSION_KEY = "snaprelay:mock:session";
-const STORE_KEY = "snaprelay:mock:store";
+const SESSION_KEY = "nexis:mock:session";
+const STORE_KEY = "nexis:mock:store";
 
 type PendingSignup = { email: string; password: string; code: string };
 
@@ -55,7 +55,7 @@ function saveStore(store: MockStore) {
 function seed(store: MockStore): MockStore {
   const demoUser: User & { password: string } = {
     id: "user-demo",
-    email: "demo@snaprelay.dev",
+    email: "demo@nexis.dev",
     displayName: "Demo User",
     password: "password123",
   };

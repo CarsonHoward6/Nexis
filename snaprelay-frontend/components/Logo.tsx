@@ -20,7 +20,7 @@ export function Logo({ size = 28 }: { size?: number }) {
           fillOpacity="0.9"
         />
       </svg>
-      <span className="text-lg font-semibold tracking-tight">SnapRelay</span>
+      <span className="text-lg font-semibold tracking-tight">Nexis</span>
     </div>
   );
 }

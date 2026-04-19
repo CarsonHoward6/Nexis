@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SnapRelay",
+  title: "Nexis",
   description: "Upload, share, and collaborate on photos with your team.",
 };
 

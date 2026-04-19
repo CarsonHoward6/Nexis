@@ -53,7 +53,7 @@ export default function SharePage({
               Download
             </Button>
             <p className="text-xs text-text-muted">
-              Downloading from SnapRelay — this link is temporary and works without an account.
+              Downloading from Nexis — this link is temporary and works without an account.
             </p>
           </div>
         ) : null}
