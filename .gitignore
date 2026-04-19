@@ -1,0 +1,33 @@
+# Secrets & env
+.env
+.env.local
+.env.*.local
+
+# macOS
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js build artifacts
+.next/
+out/
+
+# Vercel
+.vercel/
+
+# TypeScript incremental
+*.tsbuildinfo
+next-env.d.ts
+
+# Lambda deploy artifacts
+snaprelay-backend/**/*.zip
+snaprelay-backend/**/node_modules/
