@@ -1,0 +1,57 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Logs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": "arn:aws:logs:us-east-1:605151466332:*"
+    },
+    {
+      "Sid": "S3ObjectAccess",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:HeadObject"],
+      "Resource": "arn:aws:s3:::snaprelay-files-605151466332/*"
+    },
+    {
+      "Sid": "S3Bucket",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
+      "Resource": "arn:aws:s3:::snaprelay-files-605151466332"
+    },
+    {
+      "Sid": "Dynamo",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:TransactWriteItems"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-files",
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-files/index/*",
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-groups",
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-memberships",
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-memberships/index/*",
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-invites",
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-shares"
+      ]
+    },
+    {
+      "Sid": "Sqs",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:ChangeMessageVisibility"
+      ],
+      "Resource": "arn:aws:sqs:us-east-1:605151466332:snaprelay-processing"
+    }
+  ]
+}

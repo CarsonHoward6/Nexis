@@ -67,9 +67,6 @@ function LoginForm() {
           Create one
         </Link>
       </p>
-      <p className="rounded-[12px] border border-border bg-surface px-4 py-3 text-xs text-text-muted">
-        Demo: <span className="text-text-secondary">demo@nexis.dev</span> / password123
-      </p>
     </form>
   );
 }

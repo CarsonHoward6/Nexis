@@ -108,7 +108,6 @@ function SignupForm() {
         value={code}
         onChange={(e) => setCode(e.target.value)}
         error={error ?? undefined}
-        hint="Demo code: 123456"
       />
       <Button type="submit" loading={loading} size="lg">
         Verify &amp; continue
