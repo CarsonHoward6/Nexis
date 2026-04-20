@@ -1,9 +1,24 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
-import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { HeadObjectCommand } from "@aws-sdk/client-s3";
+import { nanoid } from "nanoid";
 import { ddb } from "../lib/dynamo.js";
 import { s3 } from "../lib/s3.js";
 import { BUCKET, T_FILES } from "../lib/env.js";
+import { fileKindFor } from "../lib/kind.js";
+
+const mimeFromExt = (name: string): string => {
+  const ext = name.toLowerCase().split(".").pop() || "";
+  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+  if (ext === "png") return "image/png";
+  if (ext === "heic") return "image/heic";
+  if (ext === "cr2") return "image/x-canon-cr2";
+  if (ext === "cr3") return "image/x-canon-cr3";
+  if (ext === "nef") return "image/x-nikon-nef";
+  if (ext === "arw") return "image/x-sony-arw";
+  if (ext === "dng") return "image/x-adobe-dng";
+  return "application/octet-stream";
+};
 
 export const handler: SQSHandler = async (event: SQSEvent) => {
   for (const rec of event.Records) {
@@ -14,34 +29,77 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
       console.error("bad sqs body", rec.body);
       continue;
     }
-    const s3Records = body.Records || [];
-    for (const r of s3Records) {
+    for (const r of body.Records || []) {
       const key = decodeURIComponent((r.s3?.object?.key || "").replace(/\+/g, " "));
       if (!key) continue;
-      const m = key.match(/^uploads\/([^/]+)\/([^/]+)\//);
-      if (!m) {
-        console.log("skip non-upload key", key);
-        continue;
-      }
-      const fileId = m[2];
-
-      let size: number | undefined;
       try {
-        const head = await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: key }));
-        size = head.ContentLength;
+        await handleKey(key);
       } catch (e) {
-        console.error("head failed", key, e);
+        console.error("handleKey failed", key, e);
       }
-
-      await ddb.send(new UpdateCommand({
-        TableName: T_FILES,
-        Key: { fileId },
-        UpdateExpression: "SET #s = :ready" + (size ? ", fileSize = :sz" : ""),
-        ExpressionAttributeNames: { "#s": "status" },
-        ExpressionAttributeValues: size
-          ? { ":ready": "ready", ":sz": size }
-          : { ":ready": "ready" },
-      })).catch((e) => console.error("update failed", fileId, e));
     }
   }
 };
+
+async function handleKey(key: string) {
+  // Browser upload: uploads/{userId}/{fileId}/{filename}
+  let m = key.match(/^uploads\/([^/]+)\/([^/]+)\//);
+  if (m) {
+    const fileId = m[2];
+    const size = await headSize(key);
+    await ddb.send(new UpdateCommand({
+      TableName: T_FILES,
+      Key: { fileId },
+      UpdateExpression: "SET #s = :ready" + (size ? ", fileSize = :sz" : ""),
+      ExpressionAttributeNames: { "#s": "status" },
+      ExpressionAttributeValues: size ? { ":ready": "ready", ":sz": size } : { ":ready": "ready" },
+    }));
+    return;
+  }
+
+  // Camera SFTP: camera-inbox/{userId}/{groupId}/{filename}
+  m = key.match(/^camera-inbox\/([^/]+)\/([^/]+)\/(.+)$/);
+  if (m) {
+    const [, userId, groupIdRaw, fileName] = m;
+    const size = (await headSize(key)) ?? 0;
+    const fileId = nanoid(21);
+    const mimeType = mimeFromExt(fileName);
+    const groupId = groupIdRaw === "__mine__" ? `__mine__${userId}` : groupIdRaw;
+    const groupIdClient = groupIdRaw === "__mine__" ? null : groupIdRaw;
+    const now = new Date().toISOString();
+    await ddb.send(new PutCommand({
+      TableName: T_FILES,
+      Item: {
+        fileId,
+        id: fileId,
+        userId,
+        uploadedBy: "camera",
+        fileName,
+        fileSize: size,
+        mimeType,
+        fileKind: fileKindFor(mimeType, fileName),
+        s3Key: key,
+        groupId,
+        groupIdClient,
+        isPublic: false,
+        status: "ready",
+        uploadedAt: now,
+        source: "camera",
+      },
+    }));
+    console.log("camera ingest ok", { fileId, userId, groupId, fileName });
+    return;
+  }
+
+  console.log("skip unknown key", key);
+}
+
+async function headSize(key: string): Promise<number | undefined> {
+  try {
+    const head = await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: key }));
+    return head.ContentLength;
+  } catch (e) {
+    console.error("head failed", key, e);
+    return undefined;
+  }
+}

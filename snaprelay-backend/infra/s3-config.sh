@@ -55,11 +55,20 @@ echo "[ok] SQS policy set"
 
 cat >"$NOTIF" <<EOF
 {
-  "QueueConfigurations": [{
-    "QueueArn": "$SQS_QUEUE_ARN",
-    "Events": ["s3:ObjectCreated:*"],
-    "Filter": { "Key": { "FilterRules": [{ "Name": "prefix", "Value": "uploads/" }] } }
-  }]
+  "QueueConfigurations": [
+    {
+      "Id": "s3-uploads",
+      "QueueArn": "$SQS_QUEUE_ARN",
+      "Events": ["s3:ObjectCreated:*"],
+      "Filter": { "Key": { "FilterRules": [{ "Name": "prefix", "Value": "uploads/" }] } }
+    },
+    {
+      "Id": "s3-camera",
+      "QueueArn": "$SQS_QUEUE_ARN",
+      "Events": ["s3:ObjectCreated:*"],
+      "Filter": { "Key": { "FilterRules": [{ "Name": "prefix", "Value": "camera-inbox/" }] } }
+    }
+  ]
 }
 EOF
 
