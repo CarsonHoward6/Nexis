@@ -9,6 +9,7 @@ import { FileGrid } from "@/components/FileGrid";
 import { FileModal } from "@/components/FileModal";
 import { CreateGroupDialog } from "@/components/CreateGroupDialog";
 import { InviteDialog } from "@/components/InviteDialog";
+import { CameraDialog } from "@/components/CameraDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { Button } from "@/components/Button";
 import { Logo } from "@/components/Logo";
@@ -30,6 +31,7 @@ function Gallery() {
   const [openFile, setOpenFile] = useState<FileItem | null>(null);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [inviteGroup, setInviteGroup] = useState<Group | null>(null);
+  const [camerasGroup, setCamerasGroup] = useState<Group | null>(null);
   const [shareFile, setShareFile] = useState<FileItem | null>(null);
 
   const { data: groups = [] } = useQuery({
@@ -64,6 +66,7 @@ function Gallery() {
           onSelect={setSelection}
           onCreate={() => setCreateGroupOpen(true)}
           onInvite={setInviteGroup}
+          onCameras={setCamerasGroup}
         />
         <section className="flex flex-1 flex-col gap-6">
           <div className="flex items-baseline justify-between gap-4">
@@ -106,6 +109,12 @@ function Gallery() {
         groupId={inviteGroup?.id ?? null}
         groupName={inviteGroup?.name}
         onClose={() => setInviteGroup(null)}
+      />
+      <CameraDialog
+        open={camerasGroup !== null}
+        groupId={camerasGroup?.id ?? null}
+        groupName={camerasGroup?.name}
+        onClose={() => setCamerasGroup(null)}
       />
       <ShareDialog
         open={shareFile !== null}

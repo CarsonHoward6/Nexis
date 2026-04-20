@@ -16,6 +16,7 @@ import type {
   ShareLink,
   PublicShare,
   Invite,
+  Camera,
 } from "./types";
 
 configureAmplify();
@@ -169,6 +170,18 @@ export const realApi = {
     });
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     return { ...r, url: r.url?.startsWith("http") ? r.url : `${origin}/s/${r.shareId}` };
+  },
+
+  async listCameras(groupId: string): Promise<Camera[]> {
+    return req<Camera[]>("GET", `/groups/${encodeURIComponent(groupId)}/cameras`);
+  },
+
+  async registerCamera(groupId: string, args: { label: string; sshPublicKey: string }): Promise<Camera> {
+    return req<Camera>("POST", `/groups/${encodeURIComponent(groupId)}/cameras`, args);
+  },
+
+  async deleteCamera(cameraId: string): Promise<void> {
+    await req<{ deleted: boolean }>("DELETE", `/cameras/${encodeURIComponent(cameraId)}`);
   },
 
   async getPublicShare(shareId: string): Promise<PublicShare> {

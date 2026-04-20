@@ -31,6 +31,22 @@ export type FileItem = {
   status: FileStatus;
   uploadedAt: string;
   isPublic: boolean;
+  source?: "browser" | "camera";
+  cameraId?: string;
+  cameraLabel?: string;
+  cameraOwnerEmail?: string;
+};
+
+export type Camera = {
+  cameraId: string;
+  label: string;
+  groupId: string;
+  sftpUsername: string;
+  host: string;
+  s3Path: string;
+  createdAt: string;
+  ownerEmail: string;
+  isOwner: boolean;
 };
 
 export type PresignResult = {

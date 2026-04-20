@@ -4,7 +4,7 @@ import { ddb } from "../lib/dynamo.js";
 import { T_FILES, T_SHARES } from "../lib/env.js";
 import { handle, ok, parseBody, requireAuth, err } from "../lib/http.js";
 
-const APP_URL = process.env.APP_URL || "";
+// URL is composed on the frontend; backend returns a relative path.
 
 type Body = { expiresInSec?: number };
 
@@ -37,9 +37,5 @@ export const handler = handle(async (event) => {
     },
   }));
 
-  return ok({
-    shareId,
-    url: APP_URL ? `${APP_URL}/s/${shareId}` : `/s/${shareId}`,
-    expiresAt,
-  });
+  return ok({ shareId, url: `/s/${shareId}`, expiresAt });
 });

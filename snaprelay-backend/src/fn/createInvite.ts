@@ -5,7 +5,8 @@ import { T_GROUPS, T_INVITES } from "../lib/env.js";
 import { handle, ok, requireAuth, err } from "../lib/http.js";
 import { requireMember } from "../lib/groups.js";
 
-const APP_URL = process.env.APP_URL || "";
+// URL is built on the frontend from window.location.origin, so return a
+// relative path here — prevents stale invite domains after a redeploy.
 
 export const handler = handle(async (event) => {
   const auth = requireAuth(event);
@@ -27,7 +28,7 @@ export const handler = handle(async (event) => {
 
   return ok({
     inviteCode,
-    url: APP_URL ? `${APP_URL}/join/${inviteCode}` : `/join/${inviteCode}`,
+    url: `/join/${inviteCode}`,
     groupId,
     groupName: g.Item.name,
     expiresAt,

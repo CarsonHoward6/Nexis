@@ -40,5 +40,9 @@ function reshape(i: any) {
     status: i.status,
     uploadedAt: i.uploadedAt,
     isPublic: !!i.isPublic,
+    source: i.source || "browser",
+    cameraId: i.cameraId,
+    cameraLabel: i.cameraLabel,
+    cameraOwnerEmail: i.cameraOwnerEmail,
   };
 }

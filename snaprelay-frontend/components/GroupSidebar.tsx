@@ -14,11 +14,13 @@ export function GroupSidebar({
   onSelect,
   onCreate,
   onInvite,
+  onCameras,
 }: {
   selection: GroupSelection;
   onSelect: (s: GroupSelection) => void;
   onCreate: () => void;
   onInvite: (group: Group) => void;
+  onCameras: (group: Group) => void;
 }) {
   const { data: groups = [] } = useQuery({
     queryKey: ["groups"],
@@ -53,23 +55,41 @@ export function GroupSidebar({
             label={g.name}
             hint={`${g.memberCount} member${g.memberCount === 1 ? "" : "s"}`}
             rightAction={
-              g.role === "owner" ? (
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onInvite(g);
+                    onCameras(g);
                   }}
-                  aria-label={`Invite to ${g.name}`}
+                  aria-label={`Cameras for ${g.name}`}
+                  title="Cameras"
                   className="rounded-full p-1 text-text-muted hover:bg-surface-elevated hover:text-text-primary"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M20 8v6M23 11h-6" strokeLinecap="round" />
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
                   </svg>
                 </button>
-              ) : null
+                {g.role === "owner" ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onInvite(g);
+                    }}
+                    aria-label={`Invite to ${g.name}`}
+                    title="Invite"
+                    className="rounded-full p-1 text-text-muted hover:bg-surface-elevated hover:text-text-primary"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M20 8v6M23 11h-6" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                ) : null}
+              </div>
             }
           />
         ))}

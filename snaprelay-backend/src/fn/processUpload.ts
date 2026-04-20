@@ -1,10 +1,10 @@
 import type { SQSEvent, SQSHandler } from "aws-lambda";
-import { PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { HeadObjectCommand } from "@aws-sdk/client-s3";
 import { nanoid } from "nanoid";
 import { ddb } from "../lib/dynamo.js";
 import { s3 } from "../lib/s3.js";
-import { BUCKET, T_FILES } from "../lib/env.js";
+import { BUCKET, T_CAMERAS, T_FILES } from "../lib/env.js";
 import { fileKindFor } from "../lib/kind.js";
 
 const mimeFromExt = (name: string): string => {
@@ -57,37 +57,49 @@ async function handleKey(key: string) {
     return;
   }
 
-  // Camera SFTP: camera-inbox/{userId}/{groupId}/{filename}
-  m = key.match(/^camera-inbox\/([^/]+)\/([^/]+)\/(.+)$/);
+  // Camera SFTP: camera-inbox/{cameraId}/{filename}
+  m = key.match(/^camera-inbox\/([^/]+)\/(.+)$/);
   if (m) {
-    const [, userId, groupIdRaw, fileName] = m;
+    const [, cameraId, fileName] = m;
+    const cam = await ddb.send(new GetCommand({ TableName: T_CAMERAS, Key: { cameraId } }));
+    if (!cam.Item) {
+      console.warn("unknown cameraId — skipping", cameraId, key);
+      return;
+    }
+    const { ownerSub, groupId, label, ownerEmail } = cam.Item as {
+      ownerSub: string;
+      groupId: string;
+      label: string;
+      ownerEmail?: string;
+    };
     const size = (await headSize(key)) ?? 0;
     const fileId = nanoid(21);
     const mimeType = mimeFromExt(fileName);
-    const groupId = groupIdRaw === "__mine__" ? `__mine__${userId}` : groupIdRaw;
-    const groupIdClient = groupIdRaw === "__mine__" ? null : groupIdRaw;
     const now = new Date().toISOString();
     await ddb.send(new PutCommand({
       TableName: T_FILES,
       Item: {
         fileId,
         id: fileId,
-        userId,
-        uploadedBy: "camera",
+        userId: ownerSub,
+        uploadedBy: label ? `${label} (camera)` : "camera",
         fileName,
         fileSize: size,
         mimeType,
         fileKind: fileKindFor(mimeType, fileName),
         s3Key: key,
         groupId,
-        groupIdClient,
+        groupIdClient: groupId.startsWith("__mine__") ? null : groupId,
         isPublic: false,
         status: "ready",
         uploadedAt: now,
         source: "camera",
+        cameraId,
+        cameraLabel: label,
+        cameraOwnerEmail: ownerEmail || "",
       },
     }));
-    console.log("camera ingest ok", { fileId, userId, groupId, fileName });
+    console.log("camera ingest ok", { fileId, cameraId, groupId, fileName });
     return;
   }
 

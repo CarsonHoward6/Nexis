@@ -127,6 +127,9 @@ ensure_route GET    /groups                      listGroups     jwt
 ensure_route POST   /groups/{groupId}/invites    createInvite   jwt
 ensure_route POST   /invites/{code}/accept       acceptInvite   jwt
 ensure_route GET    /shares/{shareId}            getShare       none
+ensure_route POST   /groups/{groupId}/cameras    registerCamera jwt
+ensure_route GET    /groups/{groupId}/cameras    listCameras    jwt
+ensure_route DELETE /cameras/{cameraId}          deleteCamera   jwt
 
 # ---- auto-deploy stage
 STAGE_EXISTS="$(aws apigatewayv2 get-stages --api-id "$API_ID" --region "$AWS_REGION" \

@@ -39,8 +39,35 @@
         "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-memberships",
         "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-memberships/index/*",
         "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-invites",
-        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-shares"
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-shares",
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-cameras",
+        "arn:aws:dynamodb:us-east-1:605151466332:table/snaprelay-cameras/index/*"
       ]
+    },
+    {
+      "Sid": "Transfer",
+      "Effect": "Allow",
+      "Action": [
+        "transfer:CreateUser",
+        "transfer:UpdateUser",
+        "transfer:DeleteUser",
+        "transfer:DescribeUser",
+        "transfer:ImportSshPublicKey",
+        "transfer:DeleteSshPublicKey",
+        "transfer:ListUsers",
+        "transfer:DescribeServer"
+      ],
+      "Resource": [
+        "arn:aws:transfer:us-east-1:605151466332:server/*",
+        "arn:aws:transfer:us-east-1:605151466332:user/*/*"
+      ]
+    },
+    {
+      "Sid": "PassSftpRole",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::605151466332:role/snaprelay-sftp-role",
+      "Condition": { "StringEquals": { "iam:PassedToService": "transfer.amazonaws.com" } }
     },
     {
       "Sid": "Sqs",

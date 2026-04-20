@@ -1,4 +1,5 @@
 import type {
+  Camera,
   FileItem,
   FileKind,
   Group,
@@ -408,6 +409,18 @@ export const mockApi = {
     saveStore(store);
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     return delay({ shareId, url: `${origin}/s/${shareId}`, expiresAt });
+  },
+
+  async listCameras(_groupId: string): Promise<Camera[]> {
+    return delay([] as Camera[]);
+  },
+
+  async registerCamera(_groupId: string, _args: { label: string; sshPublicKey: string }): Promise<Camera> {
+    throw new Error("Camera registration is only available against the real AWS backend");
+  },
+
+  async deleteCamera(_cameraId: string): Promise<void> {
+    throw new Error("Camera deletion is only available against the real AWS backend");
   },
 
   async getPublicShare(shareId: string): Promise<PublicShare> {
