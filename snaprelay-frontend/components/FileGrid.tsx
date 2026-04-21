@@ -17,8 +17,9 @@ export function FileGrid({
     queryFn: () => api.listFiles(groupId),
     refetchInterval: (q) => {
       const items = q.state.data as FileItem[] | undefined;
-      return items?.some((f) => f.status === "processing") ? 1500 : false;
+      return items?.some((f) => f.status === "processing") ? 1500 : 3000;
     },
+    refetchIntervalInBackground: false,
   });
 
   if (isLoading) {

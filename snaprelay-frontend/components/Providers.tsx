@@ -11,7 +11,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     () =>
       new QueryClient({
         defaultOptions: {
-          queries: { staleTime: 10_000, refetchOnWindowFocus: false },
+          queries: {
+            staleTime: 2_000,
+            refetchOnWindowFocus: true,
+            refetchOnReconnect: true,
+          },
         },
       }),
   );
