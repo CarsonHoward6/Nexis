@@ -124,6 +124,7 @@ ensure_route DELETE /files/{id}                  deleteFile     jwt
 ensure_route POST   /files/{id}/share            shareLink      jwt
 ensure_route POST   /groups                      createGroup    jwt
 ensure_route GET    /groups                      listGroups     jwt
+ensure_route DELETE /groups/{groupId}            deleteGroup    jwt
 ensure_route POST   /groups/{groupId}/invites    createInvite   jwt
 ensure_route POST   /invites/{code}/accept       acceptInvite   jwt
 ensure_route GET    /shares/{shareId}            getShare       none

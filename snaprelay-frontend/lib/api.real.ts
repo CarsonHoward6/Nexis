@@ -161,8 +161,15 @@ export const realApi = {
     return req<FileItem[]>("GET", `/files${qs}`);
   },
 
-  async deleteFile(fileId: string) {
-    await req<{ deleted: boolean }>("DELETE", `/files/${encodeURIComponent(fileId)}`);
+  async deleteFile(fileId: string, userId: string) {
+    await req<{ deleted: boolean }>(
+      "DELETE",
+      `/files/${encodeURIComponent(fileId)}?userId=${encodeURIComponent(userId)}`,
+    );
+  },
+
+  async deleteGroup(groupId: string) {
+    await req<{ deleted: boolean }>("DELETE", `/groups/${encodeURIComponent(groupId)}`);
   },
 
   async createShareLink(fileId: string, expiresInSec: number): Promise<ShareLink> {

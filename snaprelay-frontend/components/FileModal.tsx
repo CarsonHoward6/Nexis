@@ -32,7 +32,7 @@ export function FileModal({
     if (!confirm(`Delete "${file.fileName}"? This cannot be undone.`)) return;
     setDeleting(true);
     try {
-      await api.deleteFile(file.id);
+      await api.deleteFile(file.id, file.userId);
       toast("File deleted", "success");
       qc.invalidateQueries({ queryKey: ["files"] });
       onClose();
@@ -88,7 +88,7 @@ export function FileModal({
           />
         </dl>
         <div className="flex flex-wrap justify-end gap-2">
-          {isOwner ? (
+          {isOwner || file.groupId ? (
             <Button variant="danger" onClick={onDelete} loading={deleting}>
               Delete
             </Button>

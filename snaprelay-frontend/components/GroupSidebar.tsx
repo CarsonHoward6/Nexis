@@ -15,12 +15,14 @@ export function GroupSidebar({
   onCreate,
   onInvite,
   onCameras,
+  onDelete,
 }: {
   selection: GroupSelection;
   onSelect: (s: GroupSelection) => void;
   onCreate: () => void;
   onInvite: (group: Group) => void;
   onCameras: (group: Group) => void;
+  onDelete: (group: Group) => void;
 }) {
   const { data: groups = [] } = useQuery({
     queryKey: ["groups"],
@@ -72,22 +74,39 @@ export function GroupSidebar({
                   </svg>
                 </button>
                 {g.role === "owner" ? (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onInvite(g);
-                    }}
-                    aria-label={`Invite to ${g.name}`}
-                    title="Invite"
-                    className="rounded-full p-1 text-text-muted hover:bg-surface-elevated hover:text-text-primary"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M20 8v6M23 11h-6" strokeLinecap="round" />
-                    </svg>
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onInvite(g);
+                      }}
+                      aria-label={`Invite to ${g.name}`}
+                      title="Invite"
+                      className="rounded-full p-1 text-text-muted hover:bg-surface-elevated hover:text-text-primary"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M20 8v6M23 11h-6" strokeLinecap="round" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(g);
+                      }}
+                      aria-label={`Delete ${g.name}`}
+                      title="Delete group"
+                      className="rounded-full p-1 text-text-muted hover:bg-red-500/10 hover:text-red-400"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" strokeLinecap="round" />
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  </>
                 ) : null}
               </div>
             }

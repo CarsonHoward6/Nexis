@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoginView } from "@/components/LoginView";
 import { GroupSidebar, type GroupSelection } from "@/components/GroupSidebar";
 import { UploadZone } from "@/components/UploadZone";
@@ -15,6 +15,7 @@ import { Button } from "@/components/Button";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { useToast } from "@/components/Toast";
 import type { FileItem, Group } from "@/lib/types";
 
 export default function HomePage() {
@@ -27,12 +28,31 @@ export default function HomePage() {
 
 function Gallery() {
   const { user, signOut } = useAuth();
+  const qc = useQueryClient();
+  const { toast } = useToast();
   const [selection, setSelection] = useState<GroupSelection>({ kind: "mine" });
   const [openFile, setOpenFile] = useState<FileItem | null>(null);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [inviteGroup, setInviteGroup] = useState<Group | null>(null);
   const [camerasGroup, setCamerasGroup] = useState<Group | null>(null);
   const [shareFile, setShareFile] = useState<FileItem | null>(null);
+
+  async function onDeleteGroup(g: Group) {
+    if (!confirm(`Delete "${g.name}"? All photos and memberships in this group will be permanently removed.`)) {
+      return;
+    }
+    try {
+      await api.deleteGroup(g.id);
+      toast(`Deleted "${g.name}"`, "success");
+      if (selection.kind === "group" && selection.groupId === g.id) {
+        setSelection({ kind: "mine" });
+      }
+      qc.invalidateQueries({ queryKey: ["groups"] });
+      qc.invalidateQueries({ queryKey: ["files"] });
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Could not delete group", "error");
+    }
+  }
 
   const { data: groups = [] } = useQuery({
     queryKey: ["groups"],
@@ -67,6 +87,7 @@ function Gallery() {
           onCreate={() => setCreateGroupOpen(true)}
           onInvite={setInviteGroup}
           onCameras={setCamerasGroup}
+          onDelete={onDeleteGroup}
         />
         <section className="flex flex-1 flex-col gap-6">
           <div className="flex items-baseline justify-between gap-4">

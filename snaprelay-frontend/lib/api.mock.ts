@@ -385,13 +385,35 @@ export const mockApi = {
     return delay(filtered);
   },
 
-  async deleteFile(fileId: string) {
+  async deleteFile(fileId: string, _userId?: string) {
     const me = requireUser();
     const store = loadStore();
     const f = store.files[fileId];
     if (!f) throw new Error("File not found");
-    if (f.userId !== me.id) throw new Error("Only the uploader can delete");
+    if (f.groupId) {
+      const membership = store.memberships[me.id] ?? [];
+      if (!membership.includes(f.groupId)) throw new Error("Not a member of this group");
+    } else if (f.userId !== me.id) {
+      throw new Error("Only the uploader can delete");
+    }
     delete store.files[fileId];
+    saveStore(store);
+    return delay(undefined);
+  },
+
+  async deleteGroup(groupId: string) {
+    const me = requireUser();
+    const store = loadStore();
+    const g = store.groups[groupId];
+    if (!g) throw new Error("Group not found");
+    if (g.ownerId !== me.id) throw new Error("Only the owner can delete this group");
+    for (const id of Object.keys(store.files)) {
+      if (store.files[id].groupId === groupId) delete store.files[id];
+    }
+    for (const uid of Object.keys(store.memberships)) {
+      store.memberships[uid] = (store.memberships[uid] ?? []).filter((x) => x !== groupId);
+    }
+    delete store.groups[groupId];
     saveStore(store);
     return delay(undefined);
   },
