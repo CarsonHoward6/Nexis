@@ -55,7 +55,7 @@ export function FileGrid({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {data.map((f) => (
-        <FileCard key={f.id} file={f} onOpen={() => onOpen(f)} />
+        <FileCard key={f.id} file={f} onOpen={onOpen} />
       ))}
     </div>
   );
