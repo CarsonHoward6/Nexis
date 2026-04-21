@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Dialog } from "./Dialog";
 import { Button } from "./Button";
 import { api } from "@/lib/api";
@@ -72,6 +73,18 @@ export function InviteDialog({
         <div className="flex flex-col gap-4">
           <p className="text-sm text-text-secondary">
             Anyone with this link who signs in can join this group. The link expires in 7 days.
+          </p>
+          <div className="flex justify-center rounded-[12px] border border-border bg-white p-4">
+            <QRCodeSVG
+              value={invite.url}
+              size={192}
+              level="M"
+              marginSize={2}
+              aria-label="Invite QR code"
+            />
+          </div>
+          <p className="text-center text-xs text-text-muted">
+            Scan with a phone camera to open the link.
           </p>
           <div className="flex items-center gap-2 rounded-[12px] border border-border bg-bg px-3 py-2">
             <code className="flex-1 truncate text-sm text-text-primary">{invite.url}</code>
