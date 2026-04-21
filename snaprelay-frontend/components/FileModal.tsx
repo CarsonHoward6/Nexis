@@ -43,32 +43,38 @@ export function FileModal({
     }
   }
 
-  async function onDownload() {
-    if (!file) return;
-    try {
-      const link = await api.createShareLink(file.id, 3600);
-      window.open(link.url, "_blank");
-    } catch (err) {
-      toast(err instanceof Error ? err.message : "Could not create link", "error");
+  function onDownload() {
+    if (!file?.downloadUrl) {
+      toast("Download URL not ready yet — refresh", "error");
+      return;
     }
+    const a = document.createElement("a");
+    a.href = file.downloadUrl;
+    a.download = file.fileName;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   return (
     <Dialog open onClose={onClose} title={file.fileName} fullScreenOnMobile>
       <div className="flex flex-col gap-5">
         <div className="overflow-hidden rounded-[12px] border border-border bg-bg">
-          {file.thumbnailDataUrl ? (
+          {file.previewUrl || file.thumbnailDataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={file.thumbnailDataUrl}
+              src={file.previewUrl || file.thumbnailDataUrl}
               alt={file.fileName}
-              className="max-h-[60vh] w-full object-contain"
+              className="max-h-[70vh] w-full object-contain"
             />
           ) : (
             <div className="flex aspect-[4/3] items-center justify-center text-text-muted">
               {file.fileKind === "raw"
                 ? "Camera RAW — preview not available in the browser"
-                : "No preview"}
+                : file.status === "processing"
+                  ? "Processing…"
+                  : "No preview"}
             </div>
           )}
         </div>
@@ -90,7 +96,7 @@ export function FileModal({
           <Button variant="secondary" onClick={() => onShare(file)}>
             Share
           </Button>
-          <Button onClick={onDownload} disabled={file.status !== "ready"}>
+          <Button onClick={onDownload} disabled={!file.downloadUrl}>
             Download
           </Button>
         </div>

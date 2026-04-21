@@ -35,6 +35,8 @@ export type FileItem = {
   cameraId?: string;
   cameraLabel?: string;
   cameraOwnerEmail?: string;
+  previewUrl?: string;
+  downloadUrl?: string;
 };
 
 export type Camera = {

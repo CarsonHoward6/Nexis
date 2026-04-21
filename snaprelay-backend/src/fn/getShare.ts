@@ -1,6 +1,6 @@
 import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { ddb } from "../lib/dynamo.js";
-import { T_FILES, T_SHARES } from "../lib/env.js";
+import { T_SHARES } from "../lib/env.js";
 import { handle, ok, err } from "../lib/http.js";
 import { presignGet } from "../lib/s3.js";
 
@@ -11,11 +11,9 @@ export const handler = handle(async (event) => {
   const s = await ddb.send(new GetCommand({ TableName: T_SHARES, Key: { shareId } }));
   if (!s.Item) return err(404, "share not found");
   if (Date.parse(s.Item.expiresAt) < Date.now()) return err(410, "share expired");
+  if (!s.Item.s3Key) return err(410, "share predates schema update; create a new link");
 
-  const f = await ddb.send(new GetCommand({ TableName: T_FILES, Key: { fileId: s.Item.fileId } }));
-  if (!f.Item) return err(404, "file missing");
-
-  const downloadUrl = await presignGet(f.Item.s3Key, 3600, f.Item.fileName);
+  const downloadUrl = await presignGet(s.Item.s3Key, 3600, s.Item.fileName);
 
   ddb.send(new UpdateCommand({
     TableName: T_SHARES,
@@ -25,11 +23,11 @@ export const handler = handle(async (event) => {
   })).catch(() => {});
 
   return ok({
-    fileName: f.Item.fileName,
-    fileSize: f.Item.fileSize,
-    uploadedBy: f.Item.uploadedBy,
+    fileName: s.Item.fileName,
+    fileSize: s.Item.fileSize,
+    uploadedBy: s.Item.uploadedBy,
     expiresAt: s.Item.expiresAt,
     downloadUrl,
-    mimeType: f.Item.mimeType,
+    mimeType: s.Item.mimeType,
   });
 });

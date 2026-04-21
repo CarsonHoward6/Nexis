@@ -10,13 +10,18 @@ export const handler = handle(async (event) => {
   const fileId = event.pathParameters?.id;
   if (!fileId) return err(400, "fileId required");
 
-  const r = await ddb.send(new GetCommand({ TableName: T_FILES, Key: { fileId } }));
+  const r = await ddb.send(new GetCommand({
+    TableName: T_FILES,
+    Key: { userId: auth.sub, fileId },
+  }));
   const item = r.Item;
   if (!item) return err(404, "not found");
-  if (item.userId !== auth.sub) return err(403, "not owner");
 
   await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: item.s3Key })).catch(() => {});
-  await ddb.send(new DeleteCommand({ TableName: T_FILES, Key: { fileId } }));
+  await ddb.send(new DeleteCommand({
+    TableName: T_FILES,
+    Key: { userId: auth.sub, fileId },
+  }));
 
   return ok({ deleted: true });
 });

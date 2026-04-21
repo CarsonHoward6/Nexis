@@ -16,19 +16,27 @@ export const handler = handle(async (event) => {
   const b = parseBody<Body>(event);
   const ttlSec = Math.min(Math.max(b.expiresInSec || 3600, 60), 30 * 24 * 3600);
 
-  const f = await ddb.send(new GetCommand({ TableName: T_FILES, Key: { fileId } }));
+  const f = await ddb.send(new GetCommand({
+    TableName: T_FILES,
+    Key: { userId: auth.sub, fileId },
+  }));
   if (!f.Item) return err(404, "file not found");
-  if (f.Item.userId !== auth.sub) return err(403, "not owner");
 
   const shareId = nanoid(16);
   const expiresAt = new Date(Date.now() + ttlSec * 1000).toISOString();
   const ttl = Math.floor(Date.parse(expiresAt) / 1000);
 
+  // Denormalize the file fields into the share row so getShare is self-contained.
   await ddb.send(new PutCommand({
     TableName: T_SHARES,
     Item: {
       shareId,
       fileId,
+      s3Key: f.Item.s3Key,
+      fileName: f.Item.fileName,
+      fileSize: f.Item.fileSize,
+      mimeType: f.Item.mimeType,
+      uploadedBy: f.Item.uploadedBy,
       groupId: f.Item.groupId,
       createdBy: auth.sub,
       expiresAt,

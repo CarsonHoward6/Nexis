@@ -45,11 +45,11 @@ async function handleKey(key: string) {
   // Browser upload: uploads/{userId}/{fileId}/{filename}
   let m = key.match(/^uploads\/([^/]+)\/([^/]+)\//);
   if (m) {
-    const fileId = m[2];
+    const [, userId, fileId] = m;
     const size = await headSize(key);
     await ddb.send(new UpdateCommand({
       TableName: T_FILES,
-      Key: { fileId },
+      Key: { userId, fileId },
       UpdateExpression: "SET #s = :ready" + (size ? ", fileSize = :sz" : ""),
       ExpressionAttributeNames: { "#s": "status" },
       ExpressionAttributeValues: size ? { ":ready": "ready", ":sz": size } : { ":ready": "ready" },
