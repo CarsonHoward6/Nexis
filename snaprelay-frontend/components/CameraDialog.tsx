@@ -8,9 +8,9 @@ import { Input } from "./Input";
 import { api } from "@/lib/api";
 import { useToast } from "./Toast";
 import { browserSupportsFolderWatch, useFolderWatcher } from "@/lib/folderWatcher";
-import type { Camera } from "@/lib/types";
+import type { Camera, PhoneBridge } from "@/lib/types";
 
-type Mode = "home" | "add-easy" | "add-advanced";
+type Mode = "home" | "add-easy" | "add-phone" | "add-advanced";
 
 export function CameraDialog({
   open,
@@ -42,6 +42,12 @@ export function CameraDialog({
           groupName={groupName || "this group"}
           onBack={() => setMode("home")}
         />
+      ) : mode === "add-phone" && groupId ? (
+        <PhonePath
+          groupId={groupId}
+          groupName={groupName || "this group"}
+          onBack={() => setMode("home")}
+        />
       ) : mode === "add-advanced" && groupId ? (
         <AdvancedPath groupId={groupId} onBack={() => setMode("home")} />
       ) : (
@@ -49,6 +55,7 @@ export function CameraDialog({
           groupId={groupId}
           onClose={onClose}
           onPickEasy={() => setMode("add-easy")}
+          onPickPhone={() => setMode("add-phone")}
           onPickAdvanced={() => setMode("add-advanced")}
         />
       )}
@@ -62,11 +69,13 @@ function Home({
   groupId,
   onClose,
   onPickEasy,
+  onPickPhone,
   onPickAdvanced,
 }: {
   groupId: string | null;
   onClose: () => void;
   onPickEasy: () => void;
+  onPickPhone: () => void;
   onPickAdvanced: () => void;
 }) {
   const qc = useQueryClient();
@@ -89,19 +98,27 @@ function Home({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <OptionCard
-          title="Watch a folder (easiest)"
-          subtitle="Free · uses your laptop"
-          body="Canon EOS Utility (or any app) drops each photo into a folder, and this tab uploads them to the group automatically."
+          title="Watch a folder"
+          subtitle="Free · laptop required"
+          body="EOS Utility drops each photo into a folder on your laptop, and this tab auto-uploads them."
           cta="Set up folder watch"
           onClick={onPickEasy}
           accent
         />
         <OptionCard
+          title="From my phone"
+          subtitle="Free · iOS Shortcut"
+          body="Canon Camera Connect sends each photo to your phone, and an iOS Shortcut forwards it to Nexis."
+          cta="Set up phone bridge"
+          onClick={onPickPhone}
+          accent
+        />
+        <OptionCard
           title="Direct camera FTP"
-          subtitle="Advanced · costs while online"
-          body="Connect the camera's built-in Wi-Fi FTP straight to AWS. Needs an SSH key and the Transfer Family server running ($0.30/hr)."
+          subtitle="Advanced · $0.30/hr"
+          body="Camera FTPs straight to AWS. Needs an SSH key and the Transfer Family server online."
           cta="Add with SFTP"
           onClick={onPickAdvanced}
         />
@@ -109,13 +126,13 @@ function Home({
 
       <div>
         <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Registered cameras (direct FTP)
+          Registered cameras &amp; bridges
         </h4>
         {isLoading ? (
           <p className="text-sm text-text-muted">Loading…</p>
         ) : cameras.length === 0 ? (
           <p className="rounded-[12px] border border-border bg-bg px-4 py-3 text-sm text-text-muted">
-            No direct-FTP cameras yet. The watch-folder option above doesn&apos;t need a registered camera.
+            Nothing registered yet. Watch-a-folder above doesn&apos;t need a registration.
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -126,9 +143,13 @@ function Home({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-text-primary">{c.label}</p>
+                    <p className="truncate text-sm font-medium text-text-primary">
+                      {c.type === "phone" ? "📱 " : "📷 "}
+                      {c.label}
+                    </p>
                     <p className="truncate text-xs text-text-muted">
-                      owner: {c.ownerEmail || "(unknown)"}
+                      {c.type === "phone" ? "Phone bridge" : "Direct FTP"} · owner:{" "}
+                      {c.ownerEmail || "(unknown)"}
                     </p>
                   </div>
                   {c.isOwner ? (
@@ -142,10 +163,12 @@ function Home({
                     </button>
                   ) : null}
                 </div>
-                <div className="flex flex-col gap-1 text-xs text-text-secondary">
-                  <KeyVal label="SFTP host" value={c.host} />
-                  <KeyVal label="User" value={c.sftpUsername} />
-                </div>
+                {c.type === "sftp" ? (
+                  <div className="flex flex-col gap-1 text-xs text-text-secondary">
+                    <KeyVal label="SFTP host" value={c.host} />
+                    <KeyVal label="User" value={c.sftpUsername} />
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -455,6 +478,209 @@ ssh-keygen -t ed25519 -f nexis-camera
           </p>
         </Step>
       </ol>
+    </div>
+  );
+}
+
+// ---------------------- Phone bridge (iOS Shortcut) ----------------------
+
+function PhonePath({
+  groupId,
+  groupName,
+  onBack,
+}: {
+  groupId: string;
+  groupName: string;
+  onBack: () => void;
+}) {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const [label, setLabel] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [bridge, setBridge] = useState<PhoneBridge | null>(null);
+
+  const mut = useMutation({
+    mutationFn: () => api.createPhoneBridge(groupId, label.trim()),
+    onSuccess: (b) => {
+      setBridge(b);
+      toast("Phone bridge created", "success");
+      qc.invalidateQueries({ queryKey: ["cameras", groupId] });
+    },
+    onError: (e) => setError(e instanceof Error ? e.message : "Failed to create bridge"),
+  });
+
+  async function copy(value: string, note: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast(`${note} copied`, "success");
+    } catch {
+      toast("Could not copy", "error");
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      <button
+        type="button"
+        onClick={onBack}
+        className="self-start text-xs text-text-muted hover:text-text-primary"
+      >
+        ← Back
+      </button>
+
+      <div>
+        <h4 className="text-base font-semibold text-text-primary">
+          Phone bridge — R6 → phone → Nexis
+        </h4>
+        <p className="text-sm text-text-secondary">
+          After setup, every photo your R6 sends to Camera Connect auto-uploads to{" "}
+          <span className="text-text-primary">{groupName}</span>.
+        </p>
+      </div>
+
+      <ol className="flex flex-col gap-4">
+        <Step n={1} title="Pair the R6 with Canon Camera Connect on your phone">
+          Wireless → Wi-Fi → <em>Connect to smartphone</em>. (One-time setup per phone.)
+          You probably already have this done.
+        </Step>
+
+        <Step n={2} title="Name this bridge, then register it">
+          {bridge ? (
+            <p className="text-sm text-text-secondary">
+              Registered <span className="text-text-primary">{bridge.label}</span>. Scroll
+              down for your token and Shortcut setup.
+            </p>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setError(null);
+                mut.mutate();
+              }}
+              className="mt-1 flex flex-col gap-3"
+            >
+              <Input
+                label="Bridge name"
+                placeholder="e.g. Carson's iPhone → Wedding"
+                required
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+              />
+              {error ? <p className="text-sm text-red-400">{error}</p> : null}
+              <div>
+                <Button type="submit" loading={mut.isPending} size="sm">
+                  Register bridge
+                </Button>
+              </div>
+            </form>
+          )}
+        </Step>
+
+        {bridge ? (
+          <>
+            <Step n={3} title="Copy your URL and token">
+              <div className="mt-1 flex flex-col gap-3">
+                <div className="rounded-[12px] border border-accent/40 bg-accent/5 px-3 py-2 text-xs text-text-muted">
+                  This token is shown once. If you lose it, remove the bridge and make a new one.
+                </div>
+                <TokenBlock
+                  label="Presign URL"
+                  value={bridge.presignUrl}
+                  onCopy={() => copy(bridge.presignUrl, "URL")}
+                />
+                <TokenBlock
+                  label="Upload token"
+                  value={bridge.uploadToken}
+                  onCopy={() => copy(bridge.uploadToken, "Token")}
+                />
+              </div>
+            </Step>
+
+            <Step n={4} title="Build the iOS Shortcut">
+              <div className="mt-1 flex flex-col gap-2 text-sm">
+                <p>On the iPhone, open Shortcuts → new Shortcut → add these steps in order:</p>
+                <ol className="ml-4 list-decimal space-y-1 text-text-secondary">
+                  <li>
+                    <strong>Get Latest Photos</strong> — Count <code>1</code>.
+                  </li>
+                  <li>
+                    <strong>Get Details of Images</strong> — detail{" "}
+                    <code>Media Type</code>. Save as <code>mime</code>.
+                  </li>
+                  <li>
+                    <strong>Get Details of Images</strong> — detail{" "}
+                    <code>File Extension</code>. Save as <code>ext</code>.
+                  </li>
+                  <li>
+                    <strong>Text</strong>:{" "}
+                    <code>photo-{"{"}Current Date, yyyyMMdd-HHmmss{"}"}.{"{"}ext{"}"}</code>.
+                    Save as <code>fileName</code>.
+                  </li>
+                  <li>
+                    <strong>Get Contents of URL</strong> (presign):{" "}
+                    method <code>POST</code>, URL the presign URL above, Headers{" "}
+                    <code>x-nexis-token</code> = your token and{" "}
+                    <code>content-type: application/json</code>, Body type <em>JSON</em>:{" "}
+                    <code>fileName</code> and <code>mimeType</code>. Save response as{" "}
+                    <code>presign</code>.
+                  </li>
+                  <li>
+                    <strong>Get Dictionary Value</strong> — key <code>uploadUrl</code> from{" "}
+                    <code>presign</code>.
+                  </li>
+                  <li>
+                    <strong>Get Contents of URL</strong> (upload): method <code>PUT</code>,
+                    URL <code>uploadUrl</code>, Headers <code>content-type: {"{"}mime{"}"}</code>,
+                    Request Body <em>File</em> (the photo from step 1).
+                  </li>
+                  <li>
+                    <strong>Show Notification</strong> — "Uploaded to Nexis".
+                  </li>
+                </ol>
+              </div>
+            </Step>
+
+            <Step n={5} title="Set up the automation">
+              <p>
+                Shortcuts app → <em>Automation</em> tab → <em>New</em> → <em>Photo</em> → pick{" "}
+                <em>Image is taken</em> or <em>Photo added</em> → album{" "}
+                <em>Camera Connect</em> (or Camera Roll). Action:{" "}
+                <em>Run Shortcut</em> → select the one you just built. Disable{" "}
+                <em>Ask before running</em>.
+              </p>
+            </Step>
+
+            <Step n={6} title="Shoot!">
+              On the R6: press <em>Playback</em> → <em>Q</em> →{" "}
+              <em>Send images to smartphone</em>. The photo lands in your Camera Roll, the
+              automation fires, and the photo appears on{" "}
+              <span className="text-text-primary">{groupName}</span> in ~3–5 s.
+            </Step>
+          </>
+        ) : null}
+      </ol>
+    </div>
+  );
+}
+
+function TokenBlock({
+  label,
+  value,
+  onCopy,
+}: {
+  label: string;
+  value: string;
+  onCopy: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1 text-xs">
+      <span className="text-text-muted">{label}</span>
+      <div className="flex items-center gap-2 rounded-[10px] border border-border bg-bg px-3 py-2">
+        <code className="flex-1 break-all text-text-primary">{value}</code>
+        <Button size="sm" variant="ghost" onClick={onCopy}>
+          Copy
+        </Button>
+      </div>
     </div>
   );
 }

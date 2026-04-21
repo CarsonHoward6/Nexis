@@ -423,6 +423,10 @@ export const mockApi = {
     throw new Error("Camera deletion is only available against the real AWS backend");
   },
 
+  async createPhoneBridge(_groupId: string, _label: string): Promise<import("./types").PhoneBridge> {
+    throw new Error("Phone bridges are only available against the real AWS backend");
+  },
+
   async getPublicShare(shareId: string): Promise<PublicShare> {
     const store = loadStore();
     const sh = store.shares[shareId];

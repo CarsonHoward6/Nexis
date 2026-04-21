@@ -52,6 +52,7 @@ export const handler = handle(async (event) => {
       ownerSub: auth.sub,
       ownerEmail: auth.email || "",
       label,
+      type: "sftp",
       sftpUsername,
       createdAt: now,
     },
@@ -60,6 +61,7 @@ export const handler = handle(async (event) => {
   return ok({
     cameraId,
     label,
+    type: "sftp",
     groupId,
     sftpUsername,
     host: `${SFTP_SERVER_ID}.server.transfer.${REGION}.amazonaws.com`,

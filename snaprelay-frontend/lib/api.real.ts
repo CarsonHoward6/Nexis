@@ -17,6 +17,7 @@ import type {
   PublicShare,
   Invite,
   Camera,
+  PhoneBridge,
 } from "./types";
 
 configureAmplify();
@@ -182,6 +183,12 @@ export const realApi = {
 
   async deleteCamera(cameraId: string): Promise<void> {
     await req<{ deleted: boolean }>("DELETE", `/cameras/${encodeURIComponent(cameraId)}`);
+  },
+
+  async createPhoneBridge(groupId: string, label: string): Promise<PhoneBridge> {
+    return req<PhoneBridge>("POST", `/groups/${encodeURIComponent(groupId)}/phone-bridges`, {
+      label,
+    });
   },
 
   async getPublicShare(shareId: string): Promise<PublicShare> {

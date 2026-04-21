@@ -25,12 +25,12 @@ if [ -z "$API_ID" ] || [ "$API_ID" = "None" ]; then
   API_ID="$(aws apigatewayv2 create-api \
     --name "$API_NAME" \
     --protocol-type HTTP \
-    --cors-configuration AllowOrigins='*',AllowMethods='GET,POST,DELETE,OPTIONS',AllowHeaders='content-type,authorization' \
+    --cors-configuration AllowOrigins='*',AllowMethods='GET,POST,DELETE,OPTIONS',AllowHeaders='content-type,authorization,x-nexis-token' \
     --region "$AWS_REGION" --query ApiId --output text)"
 else
   echo "[exists] API $API_ID"
   aws apigatewayv2 update-api --api-id "$API_ID" \
-    --cors-configuration AllowOrigins='*',AllowMethods='GET,POST,DELETE,OPTIONS',AllowHeaders='content-type,authorization' \
+    --cors-configuration AllowOrigins='*',AllowMethods='GET,POST,DELETE,OPTIONS',AllowHeaders='content-type,authorization,x-nexis-token' \
     --region "$AWS_REGION" >/dev/null
 fi
 
@@ -127,9 +127,11 @@ ensure_route GET    /groups                      listGroups     jwt
 ensure_route POST   /groups/{groupId}/invites    createInvite   jwt
 ensure_route POST   /invites/{code}/accept       acceptInvite   jwt
 ensure_route GET    /shares/{shareId}            getShare       none
-ensure_route POST   /groups/{groupId}/cameras    registerCamera jwt
-ensure_route GET    /groups/{groupId}/cameras    listCameras    jwt
-ensure_route DELETE /cameras/{cameraId}          deleteCamera   jwt
+ensure_route POST   /groups/{groupId}/cameras        registerCamera    jwt
+ensure_route GET    /groups/{groupId}/cameras        listCameras       jwt
+ensure_route DELETE /cameras/{cameraId}              deleteCamera      jwt
+ensure_route POST   /groups/{groupId}/phone-bridges  createPhoneBridge jwt
+ensure_route POST   /phone/presign                   phonePresign      none
 
 # ---- auto-deploy stage
 STAGE_EXISTS="$(aws apigatewayv2 get-stages --api-id "$API_ID" --region "$AWS_REGION" \

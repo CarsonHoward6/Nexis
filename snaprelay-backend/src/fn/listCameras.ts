@@ -22,8 +22,9 @@ export const handler = handle(async (event) => {
   return ok((r.Items || []).map((c: any) => ({
     cameraId: c.cameraId,
     label: c.label,
+    type: (c.type as "sftp" | "phone") || "sftp",
     groupId: c.groupId,
-    sftpUsername: c.sftpUsername,
+    sftpUsername: c.sftpUsername || "",
     host,
     s3Path: `s3://${BUCKET}/camera-inbox/${c.cameraId}/`,
     createdAt: c.createdAt,

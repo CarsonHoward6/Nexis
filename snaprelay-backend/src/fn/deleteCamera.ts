@@ -16,7 +16,7 @@ export const handler = handle(async (event) => {
   if (!cam) return err(404, "camera not found");
   if (cam.ownerSub !== auth.sub) return err(403, "only the owner can delete this camera");
 
-  if (SFTP_SERVER_ID && cam.sftpUsername) {
+  if (cam.type !== "phone" && SFTP_SERVER_ID && cam.sftpUsername) {
     await transfer.send(new DeleteUserCommand({
       ServerId: SFTP_SERVER_ID,
       UserName: cam.sftpUsername,

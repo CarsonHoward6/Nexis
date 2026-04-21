@@ -40,6 +40,7 @@ export type FileItem = {
 export type Camera = {
   cameraId: string;
   label: string;
+  type: "sftp" | "phone";
   groupId: string;
   sftpUsername: string;
   host: string;
@@ -47,6 +48,17 @@ export type Camera = {
   createdAt: string;
   ownerEmail: string;
   isOwner: boolean;
+};
+
+export type PhoneBridge = {
+  cameraId: string;
+  label: string;
+  type: "phone";
+  groupId: string;
+  uploadToken: string; // plaintext, returned exactly once
+  presignUrl: string;
+  createdAt: string;
+  ownerEmail: string;
 };
 
 export type PresignResult = {
